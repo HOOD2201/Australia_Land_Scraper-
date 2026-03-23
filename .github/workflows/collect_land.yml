@@ -1,0 +1,39 @@
+name: Collect Australian Land
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 22 * * *"
+
+jobs:
+  run-all:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install libraries
+        run: pip install requests beautifulsoup4 pandas openpyxl
+
+      - name: Run all scrapers
+        run: |
+          python scraper_melbourne.py
+          python scraper_sydney.py
+          python scraper_brisbane.py
+          python scraper_gov_vic.py
+          python scraper_gov_nsw.py
+
+      - name: Merge results
+        run: python merge_all.py
+
+      - name: Upload Excel
+        uses: actions/upload-artifact@v4
+        with:
+          name: all_land_master
+          path: all_land_master.xlsx
